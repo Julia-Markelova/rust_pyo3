@@ -103,7 +103,7 @@ fn eval_half_total_width_and_half_total_length(
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn rust_force(py: Python, m: &PyModule) -> PyResult<()> {
+fn rust_force(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_buildings, m)?)?;
     m.add_class::<model::Building>()?;
     m.add_class::<model::Position>()?;
