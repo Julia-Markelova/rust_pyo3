@@ -22,11 +22,11 @@ fn calculate_distance_between_two_clusters(
 ) -> f64 {
     let mut first_cluster_buildings = first_cluster_buildings.clone();
     let mut second_cluster_buildings = second_cluster_buildings.clone();
+
     // пересчитываем позиции сооружений с учетом положения кластера
     for building in &mut first_cluster_buildings {
         building.position = get_position_for_building(building.position, first_cluster_position)
     }
-    // println!("x = {} y = {}; angle = {} ")
     for building in &mut second_cluster_buildings {
         building.position = get_position_for_building(building.position, second_cluster_position)
     }
