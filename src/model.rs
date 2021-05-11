@@ -23,6 +23,15 @@ pub struct Building {
     pub position: Position,
 }
 
+
+#[pyclass]
+#[derive(Copy, Clone)]
+pub struct Cluster {
+    pub buildings: Vec<Building>,
+    pub position: Position,
+}
+
+
 #[pymethods]
 impl Rectangle {
     #[new]
@@ -45,7 +54,15 @@ impl Position {
 impl Building {
     #[new]
     fn new(rectangle: Rectangle, position: Position) -> Self {
-        Building { rectangle,position }
+        Building { rectangle, position }
     }
 }
 
+
+#[pymethods]
+impl Cluster {
+    #[new]
+    fn new(buildings: Vec<Building>, position: Position) -> Self {
+        Cluster { buildings, position }
+    }
+}
