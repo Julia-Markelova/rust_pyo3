@@ -24,14 +24,6 @@ pub struct Building {
 }
 
 
-#[pyclass]
-#[derive(Copy, Clone)]
-pub struct Cluster {
-    pub buildings: Vec<Building>,
-    pub position: Position,
-}
-
-
 #[pymethods]
 impl Rectangle {
     #[new]
@@ -93,17 +85,3 @@ impl Building {
     }
 }
 
-
-#[pymethods]
-impl Cluster {
-    #[new]
-    fn new(buildings: Vec<Building>, position: Position) -> Self {
-        Cluster { buildings, position }
-    }
-
-    #[getter]
-    fn position(&self) -> PyResult<Position> {
-        Ok(self.position)
-    }
-
-}
