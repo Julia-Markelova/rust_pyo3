@@ -68,6 +68,7 @@ fn calculate_distance_between_two_buildings(
 }
 
 
+#[pyfunction]
 fn get_position_for_building(
     building_position: model::Position,
     cluster_position: model::Position,
@@ -137,6 +138,8 @@ fn eval_half_total_width_and_half_total_length(
 #[pymodule]
 fn rust_force(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_buildings, m)?)?;
+    m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters, m)?)?;
+    m.add_function(wrap_pyfunction!(get_position_for_building, m)?)?;
     m.add_class::<model::Building>()?;
     m.add_class::<model::Position>()?;
     m.add_class::<model::Rectangle>()?;
