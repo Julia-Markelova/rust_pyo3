@@ -47,19 +47,19 @@ fn get_position_for_building(
             offset_y_m: building_position.offset_y_m,
             angle_deg: building_position.angle_deg,
         }
-    } else if (cluster_position.angle_deg - 90).abs() < 1e-5 {  // 90
+    } else if (cluster_position.angle_deg - 90.0).abs() < 1e-5 {  // 90
         position = model::Position {
             offset_x_m: building_position.offset_y_m,
             offset_y_m: -building_position.offset_x_m,
             angle_deg: building_position.angle_deg,
         }
-    } else if (cluster_position.angle_deg - 180).abs() < 1e-5 {  // 180
+    } else if (cluster_position.angle_deg - 180.0).abs() < 1e-5 {  // 180
         position = model::Position {
             offset_x_m: -building_position.offset_x_m,
             offset_y_m: -building_position.offset_y_m,
             angle_deg: building_position.angle_deg,
         }
-    } else if (cluster_position.angle_deg - 270).abs() < 1e-5 {  // 270
+    } else if (cluster_position.angle_deg - 270.0).abs() < 1e-5 {  // 270
         position = model::Position {
             offset_x_m: -building_position.offset_y_m,
             offset_y_m: building_position.offset_x_m,
