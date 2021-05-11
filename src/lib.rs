@@ -35,6 +35,46 @@ fn calculate_distance_between_two_buildings(
     }
 }
 
+
+fn get_position_for_building(
+    building_position: model::Position,
+    cluster_position: model::Position,
+) -> model::Position {
+    let mut position;
+    if (cluster_position.angle_deg).abs() < 1e-5 {  // 0
+        position = model::Position {
+            offset_x_m: building_position.offset_x_m,
+            offset_y_m: building_position.offset_y_m,
+            angle_deg: building_position.angle_deg,
+        }
+    } else if (cluster_position.angle_deg - 90).abs() < 1e-5 {  // 90
+        position = model::Position {
+            offset_x_m: building_position.offset_y_m,
+            offset_y_m: -building_position.offset_x_m,
+            angle_deg: building_position.angle_deg,
+        }
+    } else if (cluster_position.angle_deg - 180).abs() < 1e-5 {  // 180
+        position = model::Position {
+            offset_x_m: -building_position.offset_x_m,
+            offset_y_m: -building_position.offset_y_m,
+            angle_deg: building_position.angle_deg,
+        }
+    } else if (cluster_position.angle_deg - 270).abs() < 1e-5 {  // 270
+        position = model::Position {
+            offset_x_m: -building_position.offset_y_m,
+            offset_y_m: building_position.offset_x_m,
+            angle_deg: building_position.angle_deg,
+        }
+    } else {
+        panic!("Unsupported angle value. Expected [0, 90, 180, 270]")
+    }
+    position.offset_x_m += cluster_position.offset_x_m;
+    position.offset_y_m += cluster_position.offset_y_m;
+    position.angle_deg = (position.angle_deg + cluster_position.angle_deg) % 360.0;
+    return position;
+}
+
+
 fn eval_half_total_width_and_half_total_length(
     first_building: model::Building,
     second_building: model::Building,
