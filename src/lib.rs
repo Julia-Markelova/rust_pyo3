@@ -40,6 +40,7 @@ fn calculate_distance_between_two_clusters(
         }
     }
 
+    // https://stackoverflow.com/questions/28446632/how-do-i-get-the-minimum-or-maximum-value-of-an-iterator-containing-floating-poi
     let min = distances.iter().fold(f64::INFINITY, |a, &b| a.min(b));
     return min;
 }
