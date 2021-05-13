@@ -12,10 +12,6 @@ mod tests {
     }
 }
 
-fn min(a: f64, b: f64) -> f64 {
-    return if a < b { a }
-    else { b }
-}
 
 #[pyfunction]
 fn calculate_distance_between_two_clusters_parallel(
