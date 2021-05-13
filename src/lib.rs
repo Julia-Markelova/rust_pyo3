@@ -33,15 +33,13 @@ fn calculate_distance_between_two_clusters_parallel(
         b.position = get_position_for_building(b.position, second_cluster_position)
     });
 
-    let mut pairs: Vec<(model::Building, model::Building)> = Vec::new();
-    for b1 in first_cluster_buildings {
-        for b2 in &second_cluster_buildings {
-            pairs.push((b1, *b2))
-        }
-    }
-    let min: f64 = pairs.par_iter().map(|(b1, b2)| {
-        calculate_distance_between_two_buildings(*b1, *b2)
-    }).reduce(|| f64::INFINITY, |a, b| min(a, b));
+    let min: f64 = first_cluster_buildings
+        .par_iter()
+        .flat_map(|b1| (second_cluster_buildings.par_iter().map( move |b2| (b1, b2))))
+        .map(|(b1, b2)| {
+            calculate_distance_between_two_buildings(*b1, *b2)
+        })
+        .reduce(|| f64::INFINITY, |a, b| a.min(b));
 
     return min;
 }
