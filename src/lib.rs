@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
+use rayon::prelude::*;
 
 mod model;
 
@@ -10,6 +11,45 @@ mod tests {
         assert_eq!(2 + 2, 4);
     }
 }
+
+fn min(a: f64, b: f64) -> f64 {
+    return if a < b { a }
+    else { b }
+}
+
+#[pyfunction]
+fn calculate_distance_between_two_clusters_parallel(
+    // создать структуру кластера, которая имплементит Copy и содержит Vec<Building> нельзя,
+    // тк Vec в rust не имплементит Copy, поэтому такие аргументы
+    first_cluster_buildings: Vec<model::Building>,
+    second_cluster_buildings: Vec<model::Building>,
+    first_cluster_position: model::Position,
+    second_cluster_position: model::Position,
+) -> f64 {
+    let mut first_cluster_buildings = first_cluster_buildings.clone();
+    let mut second_cluster_buildings = second_cluster_buildings.clone();
+
+    // пересчитываем позиции сооружений с учетом положения кластера
+    first_cluster_buildings.par_iter_mut().for_each(|b| {
+        b.position = get_position_for_building(b.position, first_cluster_position)
+    });
+    second_cluster_buildings.par_iter_mut().for_each(|b| {
+        b.position = get_position_for_building(b.position, second_cluster_position)
+    });
+
+    let mut pairs: Vec<(model::Building, model::Building)> = Vec::new();
+    for b1 in first_cluster_buildings {
+        for b2 in &second_cluster_buildings {
+            pairs.push((b1, *b2))
+        }
+    }
+    let min: f64 = pairs.par_iter().map(|(b1, b2)| {
+        calculate_distance_between_two_buildings(*b1, *b2)
+    }).reduce(|| f64::INFINITY, |a, b| min(a, b));
+
+    return min;
+}
+
 
 #[pyfunction]
 fn calculate_distance_between_two_clusters(
@@ -140,6 +180,7 @@ fn eval_half_total_width_and_half_total_length(
 fn rust_force(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_buildings, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters, m)?)?;
+    m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(get_position_for_building, m)?)?;
     m.add_class::<model::Building>()?;
     m.add_class::<model::Position>()?;
