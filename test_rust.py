@@ -3,6 +3,7 @@ from uuid import UUID
 from uuid import uuid4
 
 import rust_force
+
 from force.distance import calculate_distance_between_two_clusters
 from force.internal import BuildingWrapper
 from force.internal import ClusterPosition
@@ -11,8 +12,9 @@ from force.model import FunctionalAreaType
 from force.model import Position
 from force.model import Rectangle
 
-building_count = 40000
-n_first_cluster = 15000
+building_count = 40
+n_first_cluster = 15
+
 first_cluster_id = UUID('10000000-0000-0000-0000-000000000000')
 second_cluster_id = UUID('20000000-0000-0000-0000-000000000000')
 
@@ -85,26 +87,33 @@ python_second_cluster_position = ClusterPosition(cluster_id=second_cluster_id,
                                                  offset_y_m=rust_second_cluster_position.offset_y_m,
                                                  angle_deg=rust_second_cluster_position.angle_deg)
 
-#
-# def test_equals_distance_clusters():
-#     rust_result = rust_force.calculate_distance_between_two_clusters(
-#         rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
-#         rust_second_cluster_position)
-#     python_result = calculate_distance_between_two_clusters(
-#         python_first_cluster, python_second_cluster, python_first_cluster_position, python_second_cluster_position)
-#     assert rust_result == python_result
-#
-#
-# def test_equals_distance_clusters_rust():
-#     rust_result = rust_force.calculate_distance_between_two_clusters(
-#         rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
-#         rust_second_cluster_position)
-#     rust_result_parallel = rust_force.calculate_distance_between_two_clusters_parallel(
-#         rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
-#         rust_second_cluster_position)
-#     assert rust_result == rust_result_parallel
+
+def test_equals_distance_clusters():
+    """
+    check for equals distance between clusters in python and rust
+    """
+    rust_result = rust_force.calculate_distance_between_two_clusters(
+        rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
+        rust_second_cluster_position)
+    python_result = calculate_distance_between_two_clusters(
+        python_first_cluster, python_second_cluster, python_first_cluster_position, python_second_cluster_position)
+    assert rust_result == python_result
 
 
+def test_equals_distance_clusters_rust():
+    """
+    check for equals distance between clusters in parallel rust and rust
+    """
+    rust_result = rust_force.calculate_distance_between_two_clusters(
+        rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
+        rust_second_cluster_position)
+    rust_result_parallel = rust_force.calculate_distance_between_two_clusters_parallel(
+        rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
+        rust_second_cluster_position)
+    assert rust_result == rust_result_parallel
+
+
+# benchmarks
 def test_distance_clusters_python(benchmark):
     benchmark(calculate_distance_between_two_clusters,
               python_first_cluster, python_second_cluster,
