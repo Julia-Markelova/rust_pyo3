@@ -12,6 +12,5 @@
 
 - На обычном количестве сооружений в кластерах (*5* и *7* сооружений)  
   <img src="benchmark_pictures/12_buildings.png">
-  [!12_buildings](benchmark_pictures/12_buildings.png)
 - На большом количестве сооружений в кластерах (*15000* и *25000* сооружений)  
-  [!40k_buildings](benchmark_pictures/40k_buildings.png?raw=true)
+  <img src="benchmark_pictures/40k_buildings.png">  
