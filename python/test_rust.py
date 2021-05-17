@@ -12,8 +12,8 @@ from force.model import FunctionalAreaType
 from force.model import Position
 from force.model import Rectangle
 
-building_count = 40
-n_first_cluster = 15
+building_count = 12
+n_first_cluster = 5
 
 first_cluster_id = UUID('10000000-0000-0000-0000-000000000000')
 second_cluster_id = UUID('20000000-0000-0000-0000-000000000000')
