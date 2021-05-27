@@ -100,6 +100,8 @@ for b1, b2 in product(python_buildings, python_buildings):
         rust_building_offset_rules[f'{b1.id}_{b2.id}'] = offset
         rust_building_offset_rules[f'{b2.id}_{b1.id}'] = offset
 
+with open('offsets.json', 'w') as file:
+    json.dump(rust_building_offset_rules, file)
 
 def test_equals_distance_clusters():
     """
