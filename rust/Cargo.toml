@@ -10,7 +10,9 @@ edition = "2018"
 rayon = "1.5"
 # uuid
 uuid = { version = "0.8.1", features = ["serde", "v4"] }
-
+serde = { version = "1.0.116", features = ["derive"] }
+serde_json = "1.0.57"
+lazy_static = "1.2.0"
 
 [lib]
 name = "rust_force"

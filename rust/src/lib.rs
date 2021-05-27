@@ -35,7 +35,7 @@ fn calculate_distance_between_two_clusters_parallel(
 
     let min: f64 = first_cluster_buildings
         .par_iter()
-        .flat_map(|b1| (second_cluster_buildings.par_iter().map( move |b2| (b1, b2))))
+        .flat_map(|b1| (second_cluster_buildings.par_iter().map(move |b2| (b1, b2))))
         .map(|(b1, b2)| {
             calculate_distance_between_two_buildings(*b1, *b2)
         })
