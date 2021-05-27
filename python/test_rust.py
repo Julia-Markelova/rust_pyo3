@@ -1,10 +1,14 @@
+import json
 import random
+from itertools import product
+from typing import Dict, Tuple
 from uuid import UUID
 from uuid import uuid4
 
 import rust_force
 
-from force.distance import calculate_distance_between_two_clusters
+from force.distance import calculate_distance_between_two_buildings, calculate_distance_between_two_clusters
+from force.distance import calculate_normalized_distance_between_two_clusters
 from force.internal import BuildingWrapper
 from force.internal import ClusterPosition
 from force.internal import ClusterShape
