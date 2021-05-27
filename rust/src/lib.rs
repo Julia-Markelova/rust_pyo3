@@ -54,7 +54,7 @@ lazy_static! {
     static ref BUILDING_OFFSET_RULES: HashMap<String, f64> = initialize_building_offset_rules();
 }
 
-#[pyfunction]
+
 fn initialize_building_offset_rules() -> HashMap<String, f64> {
     let mut file = File::open("offsets.json").unwrap();
     let mut buff = String::new();
@@ -168,46 +168,6 @@ fn calculate_distance_between_two_buildings(
 }
 
 
-#[pyfunction]
-fn get_position_for_building(
-    building_position: model::Position,
-    cluster_position: model::Position,
-) -> model::Position {
-    let mut position;
-    if (cluster_position.angle_deg).abs() < 1e-5 {  // 0
-        position = model::Position {
-            offset_x_m: building_position.offset_x_m,
-            offset_y_m: building_position.offset_y_m,
-            angle_deg: building_position.angle_deg,
-        }
-    } else if (cluster_position.angle_deg - 90.0).abs() < 1e-5 {  // 90
-        position = model::Position {
-            offset_x_m: building_position.offset_y_m,
-            offset_y_m: -building_position.offset_x_m,
-            angle_deg: building_position.angle_deg,
-        }
-    } else if (cluster_position.angle_deg - 180.0).abs() < 1e-5 {  // 180
-        position = model::Position {
-            offset_x_m: -building_position.offset_x_m,
-            offset_y_m: -building_position.offset_y_m,
-            angle_deg: building_position.angle_deg,
-        }
-    } else if (cluster_position.angle_deg - 270.0).abs() < 1e-5 {  // 270
-        position = model::Position {
-            offset_x_m: -building_position.offset_y_m,
-            offset_y_m: building_position.offset_x_m,
-            angle_deg: building_position.angle_deg,
-        }
-    } else {
-        panic!("Unsupported angle value. Expected [0, 90, 180, 270]")
-    }
-    position.offset_x_m += cluster_position.offset_x_m;
-    position.offset_y_m += cluster_position.offset_y_m;
-    position.angle_deg = (position.angle_deg + cluster_position.angle_deg) % 360.0;
-    return position;
-}
-
-
 fn eval_half_total_width_and_half_total_length(
     first_building: model::Building,
     second_building: model::Building,
@@ -240,9 +200,7 @@ fn rust_force(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_buildings, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters_parallel, m)?)?;
-    m.add_function(wrap_pyfunction!(get_position_for_building, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_normalized_distance_between_two_clusters, m)?)?;
-    m.add_function(wrap_pyfunction!(initialize_building_offset_rules, m)?)?;
     m.add_class::<model::Building>()?;
     m.add_class::<model::Position>()?;
     m.add_class::<model::ClusterPosition>()?;
