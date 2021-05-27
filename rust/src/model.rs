@@ -18,6 +18,13 @@ pub struct Position {
 
 #[pyclass]
 #[derive(Copy, Clone)]
+pub struct ClusterPosition {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[pyclass]
+#[derive(Copy, Clone)]
 pub struct Building {
     pub rectangle: Rectangle,
     pub position: Position,
@@ -64,6 +71,26 @@ impl Position {
     fn angle_deg(&self) -> PyResult<f64> {
         Ok(self.angle_deg)
     }
+}
+
+
+#[pymethods]
+impl ClusterPosition {
+    #[new]
+    fn new(x: f64, y: f64, ) -> Self {
+        ClusterPosition { x, y }
+    }
+
+    #[getter]
+    fn x(&self) -> PyResult<f64> {
+        Ok(self.x)
+    }
+
+    #[getter]
+    fn y(&self) -> PyResult<f64> {
+        Ok(self.y)
+    }
+
 }
 
 
