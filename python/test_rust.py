@@ -174,3 +174,16 @@ def test_distance_clusters_rust_parallel(benchmark):
     benchmark(rust_force.calculate_distance_between_two_clusters_parallel, rust_buildings[:n_first_cluster],
               rust_buildings[n_first_cluster:],
               rust_first_cluster_position, rust_second_cluster_position)
+
+
+def test_distance_normalized_clusters_python(benchmark):
+    benchmark(calculate_normalized_distance_between_two_clusters,
+              python_first_cluster, python_second_cluster,
+              python_first_cluster_position, python_second_cluster_position,
+              building_offset_rules)
+
+
+def test_distance_normalized_clusters_rust(benchmark):
+    benchmark(rust_force.calculate_normalized_distance_between_two_clusters, rust_buildings[:n_first_cluster],
+              rust_buildings[n_first_cluster:],
+              rust_first_cluster_position, rust_second_cluster_position)
