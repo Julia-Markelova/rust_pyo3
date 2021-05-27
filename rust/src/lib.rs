@@ -25,18 +25,18 @@ fn calculate_distance_between_two_clusters_parallel(
     // тк Vec в rust не имплементит Copy, поэтому такие аргументы
     first_cluster_buildings: Vec<model::Building>,
     second_cluster_buildings: Vec<model::Building>,
-    first_cluster_position: model::Position,
-    second_cluster_position: model::Position,
+    first_cluster_position: model::ClusterPosition,
+    second_cluster_position: model::ClusterPosition,
 ) -> f64 {
     let mut first_cluster_buildings = first_cluster_buildings.clone();
     let mut second_cluster_buildings = second_cluster_buildings.clone();
 
     // пересчитываем позиции сооружений с учетом положения кластера
     first_cluster_buildings.par_iter_mut().for_each(|b| {
-        b.position = get_position_for_building(b.position, first_cluster_position)
+        b.position = _get_global_position_for_building(b.position, first_cluster_position)
     });
     second_cluster_buildings.par_iter_mut().for_each(|b| {
-        b.position = get_position_for_building(b.position, second_cluster_position)
+        b.position = _get_global_position_for_building(b.position, second_cluster_position)
     });
 
     let min: f64 = first_cluster_buildings
