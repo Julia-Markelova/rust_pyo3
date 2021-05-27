@@ -117,6 +117,33 @@ def test_equals_normalized_distance_clusters():
     assert rust_result == python_result
 
 
+def test_equals_distance_buildings():
+    """
+    check for equals distance between buildings in python and rust
+    """
+    for i in range(building_count):
+        for j in range(building_count):
+            if i == j:
+                continue
+            rust_result = rust_force.calculate_distance_between_two_buildings(
+                rust_buildings[i], rust_buildings[j])
+            python_result = calculate_distance_between_two_buildings(
+                python_figures[i], python_figures[j], python_positions[i], python_positions[j])
+            assert rust_result == python_result
+
+
+def test_equals_distance_clusters():
+    """
+    check for equals distance between clusters in python and rust
+    """
+    rust_result = rust_force.calculate_distance_between_two_clusters(
+        rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
+        rust_second_cluster_position)
+    python_result = calculate_distance_between_two_clusters(
+        python_first_cluster, python_second_cluster, python_first_cluster_position, python_second_cluster_position)
+    assert rust_result == python_result
+
+
 def test_equals_distance_clusters_rust():
     """
     check for equals distance between clusters in parallel rust and rust
