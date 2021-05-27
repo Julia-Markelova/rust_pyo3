@@ -8,6 +8,9 @@ edition = "2018"
 
 [dependencies]
 rayon = "1.5"
+# uuid
+uuid = { version = "0.8.1", features = ["serde", "v4"] }
+
 
 [lib]
 name = "rust_force"
