@@ -103,15 +103,17 @@ for b1, b2 in product(python_buildings, python_buildings):
 with open('offsets.json', 'w') as file:
     json.dump(rust_building_offset_rules, file)
 
-def test_equals_distance_clusters():
+
+def test_equals_normalized_distance_clusters():
     """
-    check for equals distance between clusters in python and rust
+    check for equals normalized distance between clusters in python and rust
     """
-    rust_result = rust_force.calculate_distance_between_two_clusters(
+    rust_result = rust_force.calculate_normalized_distance_between_two_clusters(
         rust_buildings[:n_first_cluster], rust_buildings[n_first_cluster:], rust_first_cluster_position,
         rust_second_cluster_position)
-    python_result = calculate_distance_between_two_clusters(
-        python_first_cluster, python_second_cluster, python_first_cluster_position, python_second_cluster_position)
+    python_result = calculate_normalized_distance_between_two_clusters(
+        python_first_cluster, python_second_cluster, python_first_cluster_position, python_second_cluster_position,
+        building_offset_rules)
     assert rust_result == python_result
 
 
