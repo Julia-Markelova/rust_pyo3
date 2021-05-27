@@ -39,11 +39,13 @@ python_buildings = [BuildingWrapper(
     id=uuid4(),
     label='',
     local_position=python_positions[i],
-    figure=python_figures[i])
+    figure=python_figures[i],
+    connection_points=[])
     for i in range(building_count)]
 
 rust_buildings = [
     rust_force.Building(
+        id=str(python_buildings[i].id),
         rectangle=rust_force.Rectangle(
             width_m=python_figures[i].width_m,
             length_m=python_figures[i].length_m,
@@ -57,31 +59,29 @@ rust_buildings = [
     for i in range(building_count)
 ]
 
-rust_first_cluster_position = rust_force.Position(offset_x_m=random.randint(0, 100),
-                                                  offset_y_m=random.randint(0, 100),
-                                                  angle_deg=random.choice([0, 90, 180, 270]))
+rust_first_cluster_position = rust_force.ClusterPosition(x=random.randint(0, 100),
+                                                         y=random.randint(0, 100))
 
-rust_second_cluster_position = rust_force.Position(offset_x_m=random.randint(0, 100),
-                                                   offset_y_m=random.randint(0, 100),
-                                                   angle_deg=random.choice([0, 90, 180, 270]))
+rust_second_cluster_position = rust_force.ClusterPosition(x=random.randint(0, 100),
+                                                          y=random.randint(0, 100))
 
 python_first_cluster = ClusterShape(
     cluster_id=first_cluster_id,
     buildings=python_buildings[:n_first_cluster],
     functional_area=FunctionalAreaType.ONE,
-    bounds=python_figures[0]
+    figure=python_figures[0]
 )
+
 python_second_cluster = ClusterShape(
     cluster_id=second_cluster_id,
     buildings=python_buildings[n_first_cluster:],
     functional_area=FunctionalAreaType.ONE,
-    bounds=python_figures[0]
+    figure=python_figures[0]
 )
 
 python_first_cluster_position = ClusterPosition(cluster_id=first_cluster_id,
-                                                offset_x_m=rust_first_cluster_position.offset_x_m,
-                                                offset_y_m=rust_first_cluster_position.offset_y_m,
-                                                angle_deg=rust_first_cluster_position.angle_deg)
+                                                x=rust_first_cluster_position.x,
+                                                y=rust_first_cluster_position.y)
 python_second_cluster_position = ClusterPosition(cluster_id=second_cluster_id,
                                                  offset_x_m=rust_second_cluster_position.offset_x_m,
                                                  offset_y_m=rust_second_cluster_position.offset_y_m,
