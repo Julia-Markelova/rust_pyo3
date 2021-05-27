@@ -26,6 +26,10 @@ pub struct ClusterPosition {
 #[pyclass]
 #[derive(Copy, Clone)]
 pub struct Building {
+    // в расте используем uuid, а в питоне - строки
+    // в расте со строками нельзя имплементить Copy
+    // для питона нет (я пока не нашла) аналога для uuid
+    pub id: uuid::Uuid,
     pub rectangle: Rectangle,
     pub position: Position,
 }
@@ -97,8 +101,16 @@ impl ClusterPosition {
 #[pymethods]
 impl Building {
     #[new]
-    fn new(rectangle: Rectangle, position: Position) -> Self {
-        Building { rectangle, position }
+    fn new(id: String, rectangle: Rectangle, position: Position) -> Self {
+        Building {
+            id: uuid::Uuid::parse_str(&id).unwrap(),
+            rectangle,
+            position }
+    }
+
+    #[getter]
+    fn id(&self) -> PyResult<String> {
+        Ok(self.id.to_string())
     }
 
     #[getter]
