@@ -51,18 +51,18 @@ fn calculate_distance_between_two_clusters(
     // тк Vec в rust не имплементит Copy, поэтому такие аргументы
     first_cluster_buildings: Vec<model::Building>,
     second_cluster_buildings: Vec<model::Building>,
-    first_cluster_position: model::Position,
-    second_cluster_position: model::Position,
+    first_cluster_position: model::ClusterPosition,
+    second_cluster_position: model::ClusterPosition,
 ) -> f64 {
     let mut first_cluster_buildings = first_cluster_buildings.clone();
     let mut second_cluster_buildings = second_cluster_buildings.clone();
 
     // пересчитываем позиции сооружений с учетом положения кластера
     for building in &mut first_cluster_buildings {
-        building.position = get_position_for_building(building.position, first_cluster_position)
+        building.position = _get_global_position_for_building(building.position, first_cluster_position)
     }
     for building in &mut second_cluster_buildings {
-        building.position = get_position_for_building(building.position, second_cluster_position)
+        building.position = _get_global_position_for_building(building.position, second_cluster_position)
     }
 
     let mut distances: Vec<f64> = Vec::new();
@@ -176,8 +176,11 @@ fn rust_force(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_distance_between_two_clusters_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(get_position_for_building, m)?)?;
+    m.add_function(wrap_pyfunction!(calculate_normalized_distance_between_two_clusters, m)?)?;
+    m.add_function(wrap_pyfunction!(initialize_building_offset_rules, m)?)?;
     m.add_class::<model::Building>()?;
     m.add_class::<model::Position>()?;
+    m.add_class::<model::ClusterPosition>()?;
     m.add_class::<model::Rectangle>()?;
     Ok(())
 }
