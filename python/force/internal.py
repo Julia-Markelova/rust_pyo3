@@ -22,27 +22,49 @@ class ClusterConnection:
 
 
 @dataclass
+class ConnectionWrapper:
+    id: UUID
+    first_connection_point_id: UUID
+    second_connection_point_id: UUID
+    connection_cost: float
+
+
+@dataclass
+class ConnectionPointPosition:
+    connection_point_id: UUID
+    x: float
+    y: float
+
+
+@dataclass
+class ConnectionPointWrapper:
+    id: UUID
+    building_id: UUID
+    local_position: ConnectionPointPosition
+
+
+@dataclass
 class BuildingWrapper:
     id: UUID
+    label: str
     figure: Rectangle
     local_position: Position
-    label: str
+    connection_points: List[ConnectionPointWrapper]
 
 
 @dataclass
 class ClusterShape:
     cluster_id: UUID
     functional_area: FunctionalAreaType
-    bounds: Rectangle
+    figure: Rectangle
     buildings: List[BuildingWrapper]
 
 
 @dataclass
 class ClusterPosition:
     cluster_id: UUID
-    offset_x_m: float
-    offset_y_m: float
-    angle_deg: float
+    x: float
+    y: float
 
 
 @dataclass

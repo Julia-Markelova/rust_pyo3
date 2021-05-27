@@ -1,13 +1,68 @@
 from itertools import product
 from math import sqrt
+from typing import Dict
 from typing import Tuple
-from typing import Union
+from uuid import UUID
+
+import numpy as np
 
 from .internal import ClusterPosition
 from .internal import ClusterShape
-from .model import Circle
 from .model import Position
 from .model import Rectangle
+
+
+def calculate_normalized_distance_between_two_clusters(
+        first_cluster: ClusterShape,
+        second_cluster: ClusterShape,
+        first_cluster_position: ClusterPosition,
+        second_cluster_position: ClusterPosition,
+        building_offset_rules: Dict[Tuple[UUID, UUID], float]
+) -> Tuple[float, float]:
+    """
+    Вычисление расстояния между кластерами с учётом оффсетов зданий. Возвращает минимальное значение из расстояний,
+    разделённых на соответствующий оффсет.
+
+    :return Tuple[float, float]: безразмерное расстояние, значение оффсета
+   """
+    first_building_positions = [
+        _get_global_position_for_building(
+            building.local_position,
+            first_cluster_position
+        )
+        for building in first_cluster.buildings
+    ]
+
+    second_building_positions = [
+        _get_global_position_for_building(
+            building.local_position,
+            second_cluster_position
+        )
+        for building in second_cluster.buildings
+    ]
+
+    first_building_figures = [building.figure for building in first_cluster.buildings]
+    second_building_figures = [building.figure for building in second_cluster.buildings]
+    first_building_id = [building.id for building in first_cluster.buildings]
+    second_building_id = [building.id for building in second_cluster.buildings]
+
+    distances = []
+    offsets = []
+    first_indices = list(range(len(first_cluster.buildings)))
+    second_indices = list(range(len(second_cluster.buildings)))
+    for first_idx, second_idx in product(first_indices, second_indices):
+        first_figure, first_position = first_building_figures[first_idx], first_building_positions[first_idx]
+        second_figure, second_position = second_building_figures[second_idx], second_building_positions[second_idx]
+        offset_m = building_offset_rules[(first_building_id[first_idx], second_building_id[second_idx])]
+        distances.append(calculate_distance_between_two_buildings(
+            first_figure,
+            second_figure,
+            first_position,
+            second_position
+        ) / offset_m)
+        offsets.append(offset_m)
+    min_index = np.argmin(distances)
+    return distances[min_index], offsets[min_index]
 
 
 def calculate_distance_between_two_clusters(
@@ -17,7 +72,7 @@ def calculate_distance_between_two_clusters(
         second_cluster_position: ClusterPosition
 ) -> float:
     first_building_positions = [
-        _get_position_for_building(
+        _get_global_position_for_building(
             building.local_position,
             first_cluster_position
         )
@@ -25,7 +80,7 @@ def calculate_distance_between_two_clusters(
     ]
 
     second_building_positions = [
-        _get_position_for_building(
+        _get_global_position_for_building(
             building.local_position,
             second_cluster_position
         )
@@ -41,19 +96,21 @@ def calculate_distance_between_two_clusters(
     for first_idx, second_idx in product(first_indices, second_indices):
         first_figure, first_position = first_building_figures[first_idx], first_building_positions[first_idx]
         second_figure, second_position = second_building_figures[second_idx], second_building_positions[second_idx]
-        distances.append(calculate_distance_between_two_buildings(
-            first_figure,
-            second_figure,
-            first_position,
-            second_position
-        ))
+        distances.append(
+            calculate_distance_between_two_buildings(
+                first_figure,
+                second_figure,
+                first_position,
+                second_position
+            )
+        )
 
     return min(distances)
 
 
 def calculate_distance_between_two_buildings(
-        first_building_figure: Union[Circle, Rectangle],
-        second_building_figure: Union[Circle, Rectangle],
+        first_building_figure: Rectangle,
+        second_building_figure: Rectangle,
         first_building_position: Position,
         second_building_position: Position
 ) -> float:
@@ -76,69 +133,33 @@ def calculate_distance_between_two_buildings(
         return -1.
 
 
-def _get_position_for_building(
+def _get_global_position_for_building(
         local_position: Position,
         cluster_position: ClusterPosition
 ) -> Position:
-    if abs(cluster_position.angle_deg) < 1e-5:  # 0
-        position = Position(
-            building_id=local_position.building_id,
-            offset_x_m=local_position.offset_x_m,
-            offset_y_m=local_position.offset_y_m,
-            angle_deg=local_position.angle_deg
-        )
-    elif abs(cluster_position.angle_deg - 90) < 1e-5:  # 90
-        position = Position(
-            building_id=local_position.building_id,
-            offset_x_m=local_position.offset_y_m,
-            offset_y_m=-local_position.offset_x_m,
-            angle_deg=local_position.angle_deg
-        )
-    elif abs(cluster_position.angle_deg - 180) < 1e-5:  # 180
-        position = Position(
-            building_id=local_position.building_id,
-            offset_x_m=-local_position.offset_x_m,
-            offset_y_m=-local_position.offset_y_m,
-            angle_deg=local_position.angle_deg
-        )
-    elif abs(cluster_position.angle_deg - 270) < 1e-5:  # 270
-        position = Position(
-            building_id=local_position.building_id,
-            offset_x_m=-local_position.offset_y_m,
-            offset_y_m=local_position.offset_x_m,
-            angle_deg=local_position.angle_deg
-        )
-    else:
-        raise ValueError(f'Unsupported angle value: {cluster_position.angle_deg}. Expected [0, 90, 180, 270].')
-    position.offset_x_m += cluster_position.offset_x_m
-    position.offset_y_m += cluster_position.offset_y_m
-    position.angle_deg = (position.angle_deg + cluster_position.angle_deg) % 360
-    return position
+    return Position(
+        building_id=local_position.building_id,
+        offset_x_m=local_position.offset_x_m + cluster_position.x,
+        offset_y_m=local_position.offset_y_m + cluster_position.y,
+        angle_deg=local_position.angle_deg
+    )
 
 
 def _eval_half_total_width_and_half_total_length(
-        first_figure: Union[Circle, Rectangle],
-        second_figure: Union[Circle, Rectangle],
+        first_figure: Rectangle,
+        second_figure: Rectangle,
         first_angle_deg: float,
         second_angle_deg: float
 ) -> Tuple[float, float]:
-    if isinstance(first_figure, Circle):
-        first_width = first_length = first_figure.radius_m
-    else:
-        first_length = first_figure.length_m / 2
-        first_width = first_figure.width_m / 2
-
+    first_length = first_figure.length_m / 2
+    first_width = first_figure.width_m / 2
     # если угол поворота здания составляет 90 или 270 градусов
     # то длина является шириной, а ширина -- длиной
     if abs(first_angle_deg % 180 - 90) < 1e-5:
         first_length, first_width = first_width, first_length
 
-    if isinstance(second_figure, Circle):
-        second_width = second_length = second_figure.radius_m
-    else:
-        second_length = second_figure.length_m / 2
-        second_width = second_figure.width_m / 2
-
+    second_length = second_figure.length_m / 2
+    second_width = second_figure.width_m / 2
     # если угол поворота здания составляет 90 или 270 градусов
     # то длина является шириной, а ширина -- длиной
     if abs(second_angle_deg % 180 - 90) < 1e-5:
