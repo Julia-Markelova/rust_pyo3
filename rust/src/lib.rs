@@ -1,6 +1,12 @@
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 use rayon::prelude::*;
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::Read;
+#[macro_use(lazy_static)]
+extern crate lazy_static;
+
 
 mod model;
 
@@ -44,6 +50,65 @@ fn calculate_distance_between_two_clusters_parallel(
     return min;
 }
 
+lazy_static! {
+    static ref BUILDING_OFFSET_RULES: HashMap<String, f64> = initialize_building_offset_rules();
+}
+
+#[pyfunction]
+fn initialize_building_offset_rules() -> HashMap<String, f64> {
+    let mut file = File::open("offsets.json").unwrap();
+    let mut buff = String::new();
+    file.read_to_string(&mut buff).unwrap();
+
+    let map: HashMap<String, f64> = serde_json::from_str(&buff).unwrap();
+    map
+
+}
+
+#[pyfunction]
+unsafe fn calculate_normalized_distance_between_two_clusters(
+    first_cluster_buildings: Vec<model::Building>,
+    second_cluster_buildings: Vec<model::Building>,
+    first_cluster_position: model::ClusterPosition,
+    second_cluster_position: model::ClusterPosition,
+) -> (f64, f64) {
+    let mut first_cluster = first_cluster_buildings.clone();
+    let mut second_cluster = second_cluster_buildings.clone();
+
+    // пересчитываем позиции сооружений с учетом положения кластера
+    for building in &mut first_cluster {
+        building.position = _get_global_position_for_building(building.position, first_cluster_position)
+    }
+    for building in &mut second_cluster {
+        building.position = _get_global_position_for_building(building.position, second_cluster_position)
+    }
+
+    let mut min_distance: f64 = f64::INFINITY;
+    let mut offset_for_min_distance: f64 = 0.;
+    for first_building in first_cluster {
+        for second_building in &second_cluster {
+            let key = format!("{}_{}", first_building.id, second_building.id);
+            let offset: f64 = BUILDING_OFFSET_RULES[&key];
+            let distance: f64 = calculate_distance_between_two_buildings(first_building, *second_building) / offset ;
+            if distance < min_distance {
+                min_distance = distance;
+                offset_for_min_distance = offset;
+            }
+        }
+    }
+    return (min_distance, offset_for_min_distance);
+}
+
+fn _get_global_position_for_building(
+    local_position: model::Position,
+    cluster_position: model::ClusterPosition,
+) -> model::Position {
+    return model::Position {
+        offset_x_m: local_position.offset_x_m + cluster_position.x,
+        offset_y_m: local_position.offset_y_m + cluster_position.y,
+        angle_deg: local_position.angle_deg,
+    };
+}
 
 #[pyfunction]
 fn calculate_distance_between_two_clusters(
