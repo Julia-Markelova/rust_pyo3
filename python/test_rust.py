@@ -83,9 +83,18 @@ python_first_cluster_position = ClusterPosition(cluster_id=first_cluster_id,
                                                 x=rust_first_cluster_position.x,
                                                 y=rust_first_cluster_position.y)
 python_second_cluster_position = ClusterPosition(cluster_id=second_cluster_id,
-                                                 offset_x_m=rust_second_cluster_position.offset_x_m,
-                                                 offset_y_m=rust_second_cluster_position.offset_y_m,
-                                                 angle_deg=rust_second_cluster_position.angle_deg)
+                                                 x=rust_second_cluster_position.x,
+                                                 y=rust_second_cluster_position.y)
+
+building_offset_rules: Dict[Tuple[UUID, UUID], float] = {}
+rust_building_offset_rules: Dict[Tuple[str, str], float] = {}
+for b1, b2 in product(python_buildings, python_buildings):
+    if b1.id != b2.id:
+        offset = random.randint(1, 100)
+        building_offset_rules[(b1.id, b2.id)] = offset
+        building_offset_rules[(b2.id, b1.id)] = offset
+        rust_building_offset_rules[f'{b1.id}_{b2.id}'] = offset
+        rust_building_offset_rules[f'{b2.id}_{b1.id}'] = offset
 
 
 def test_equals_distance_clusters():
