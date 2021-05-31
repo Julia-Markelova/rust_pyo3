@@ -51,6 +51,7 @@ fn calculate_distance_between_two_clusters_parallel(
 }
 
 lazy_static! {
+    // "гениальное" решение для одноразовой инициализации оффсетов во избежание копирования по 100 раз
     static ref BUILDING_OFFSET_RULES: HashMap<String, f64> = initialize_building_offset_rules();
 }
 
